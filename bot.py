@@ -23,7 +23,7 @@ app.router.add_get("/", handle)
 async def main():
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, port=8080)
+    site = web.TCPSite(runner, host="0.0.0.0", port=8080)
     await site.start()
     await client.start(os.getenv("DISCORD_TOKEN"))
 

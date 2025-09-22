@@ -12,7 +12,7 @@ client = discord.Client(intents=intents)
 
 # Geminiの初期化
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("gemini-1.5-flash")
 chat = model.start_chat(history=[])
 
 
@@ -35,7 +35,7 @@ async def on_message(message):
         for chunk in chunks:
             await message.channel.send(chunk)
     except Exception as e:
-        await message.channel.send("ちょっと今忙しいから、後にして")
+        await message.channel.send(f"Geminiとの通信に失敗しました: {type(e).__name__} - {e}")
         print(f"Gemini error: {e}")
 
 # HTTPサーバーの設定（Cloud Run用）

@@ -22,6 +22,7 @@ app.router.add_get("/", handle)
 # 並行でBotとHTTPサーバーを動かす
 async def main():
     runner = web.AppRunner(app)
+    site = web.TCPSite(runner, host="0.0.0.0", port=8080)
     await runner.setup()
     site = web.TCPSite(runner, port=8080)
     await site.start()

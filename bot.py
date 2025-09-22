@@ -1,10 +1,10 @@
 import discord
-import google.generativeai as genai
+import aiohttp
+from aiohttp import web
+import asyncio
 import os
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-pro")
-
+# Discord Botの設定
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
@@ -12,12 +12,19 @@ client = discord.Client(intents=intents)
 async def on_ready():
     print(f"Logged in as {client.user}")
 
-@client.event
-async def on_message(message):
-    if message.author.bot:
-        return
-    prompt = message.content
-    response = model.generate_content(prompt)
-    await message.channel.send(response.text)
+# HTTPサーバーの設定（Cloud Run用）
+async def handle(request):
+    return web.Response(text="Bot is running!")
 
-client.run(os.getenv("DISCORD_TOKEN"))
+app = web.Application()
+app.router.add_get("/", handle)
+
+# 並行でBotとHTTPサーバーを動かす
+async def main():
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, port=8080)
+    await site.start()
+    await client.start(os.getenv("DISCORD_TOKEN"))
+
+asyncio.run(main())

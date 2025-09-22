@@ -35,7 +35,7 @@ async def on_message(message):
         for chunk in chunks:
             await message.channel.send(chunk)
     except Exception as e:
-        await message.channel.send("ちょっと今忙しいから、後にして")
+        await message.channel.send(f"Geminiとの通信に失敗しました: {type(e).__name__} - {e}")
         print(f"Gemini error: {e}")
 
 # HTTPサーバーの設定（Cloud Run用）

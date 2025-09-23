@@ -4,6 +4,9 @@ from aiohttp import web
 import google.generativeai as genai
 import asyncio
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # Discord Botの設定
 intents = discord.Intents.default()

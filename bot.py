@@ -54,6 +54,9 @@ async def on_message(message):
         chunks = split_text(response.text)
         for chunk in chunks:
             await message.channel.send(chunk)
+            print(f"User input: {input_text}")
+            print(f"Gemini response: {response.text}")
+            print(f"Sent message: {chunk}")
     except Exception as e:
         await message.channel.send(f"Geminiとの通信に失敗しました: {type(e).__name__} - {e}")
         print(f"Gemini error: {e}")

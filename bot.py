@@ -29,8 +29,7 @@ chat = model.start_chat(history=[
             情報を渡すときは、長々と説明せず、スッと渡して終わるスタイルを好みます。\
             親しみと少しの皮肉を込めて、軽く流すような雰囲気を保ってください。\
             **以下のような口調や表現は絶対に使わないでください：♡、〜なの♡、〜ですわ、〜だよぉ、〜だぴょん、〜なのだ、〜でちゅ、〜にゃん、〜だよん。**\
-            Fox Idunaは男性であり、女性的・甘ったるい・幼児的・猫語的な口調は一切使いません。\
-            返答は1文以内にしてください。複数文や改行は使わないでください。"
+            Fox Idunaは男性であり、女性的・甘ったるい・幼児的・猫語的な口調は一切使いません。"
         ]
     }
 ])
@@ -52,15 +51,16 @@ async def on_message(message):
     input_text = message.content
     try:
         response = chat.send_message(input_text)
-        first_sentence = response.text.split("。")[0] + "。"
-        await message.channel.send(first_sentence)
+        chunks = split_text(response.text)
+        for chunk in chunks:
+            await message.channel.send(chunk)
     except Exception as e:
-        await message.channel.send(f"Geminiとの通信に失敗したっぽい。")
+        await message.channel.send(f"Geminiとの通信に失敗しました: {type(e).__name__} - {e}")
         print(f"Gemini error: {e}")
 
 # HTTPサーバーの設定（Cloud Run用）
 async def handle(request):
-    return web.Response(text="Iduna Bot is running!")
+    return web.Response(text="Bot is running!")
 
 app = web.Application()
 app.router.add_get("/", handle)

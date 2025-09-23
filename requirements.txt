@@ -1,4 +1,4 @@
 discord.py
 google-generativeai
 aiohttp
-dotenv
+python-dotenv

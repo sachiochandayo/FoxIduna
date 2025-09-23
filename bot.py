@@ -51,9 +51,8 @@ async def on_message(message):
     input_text = message.content
     try:
         response = chat.send_message(input_text)
-        chunks = split_text(response.text)
-        for chunk in chunks:
-            await message.channel.send(chunk)
+        cleaned = response.text.replace("\n", " ")
+        await message.channel.send(cleaned)
     except Exception as e:
         await message.channel.send(f"Geminiとの通信に失敗しました: {type(e).__name__} - {e}")
         print(f"Gemini error: {e}")

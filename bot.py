@@ -15,7 +15,7 @@ client = discord.Client(intents=intents)
 
 # Geminiの初期化
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash-lite")
 chat = model.start_chat(history=[
     {
         "role": "user",

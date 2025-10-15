@@ -42,6 +42,7 @@ def split_text(text, chunk_size=1500):
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
+    print(bot.commands)
 
 @bot.event
 async def on_message(message):
@@ -67,6 +68,7 @@ async def on_message(message):
 
 @bot.command()
 async def createform(ctx, title, description, period, contact):
+    print("✅ createformコマンドが登録されました")
     payload = {
         "title": title,
         "description": description,

@@ -72,8 +72,7 @@ async def createform(ctx, title, description, period, contact):
         "period": period,
         "contact": contact
     }
-    GAS_URL = os.getenv("GAS_WEBAPP_URL")
-    response = requests.post(GAS_URL, json=payload)
+    response = requests.post(os.getenv("GAS_WEBAPP_URL"), json=payload)
     form_url = response.text
 
     await ctx.send(f"@everyone\n📋 日程調整はここから。皆回答してねー\n{form_url}")

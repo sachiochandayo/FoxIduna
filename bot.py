@@ -1,9 +1,9 @@
 import discord
-import aiohttp
 from aiohttp import web
 import google.generativeai as genai
 import asyncio
 import os
+import requests
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -11,7 +11,7 @@ load_dotenv()
 # Discord Botの設定
 intents = discord.Intents.default()
 intents.message_content = True
-client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix="/", intents=intents)
 
 # Geminiの初期化
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -39,14 +39,21 @@ chat = model.start_chat(history=[
 def split_text(text, chunk_size=1500):
     return [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
 
-@client.event
+@bot.event
 async def on_ready():
-    print(f"Logged in as {client.user}")
+    print(f"Logged in as {bot.user}")
 
-@client.event
+@bot.event
 async def on_message(message):
-    if message.author == client.user or message.author.bot:
+    if message.author == bot.user or message.author.bot:
         return
+
+    # コマンド形式のものは処理を分岐
+    await bot.process_commands(message)
+
+    # 通常メッセージだけGeminiに渡す
+    if message.content.startswith("/"):
+        return  # スラッシュコマンドは無視（任意）
 
     input_text = message.content
     try:
@@ -54,12 +61,22 @@ async def on_message(message):
         chunks = split_text(response.text)
         for chunk in chunks:
             await message.channel.send(chunk)
-            print(f"User input: {input_text}")
-            print(f"Gemini response: {response.text}")
-            print(f"Sent message: {chunk}")
     except Exception as e:
         await message.channel.send(f"Geminiとの通信に失敗しました: {type(e).__name__} - {e}")
         print(f"Gemini error: {e}")
+
+@bot.command()
+async def createform(ctx, title, description, period, contact):
+    payload = {
+        "title": title,
+        "description": description,
+        "period": period,
+        "contact": contact
+    }
+    response = requests.post("GASのWebApp URL", json=payload)
+    form_url = response.text
+
+    await ctx.send(f"@everyone\n📋 日程調整はここから。皆回答してねー\n{form_url}")
 
 # HTTPサーバーの設定（Cloud Run用）
 async def handle(request):
@@ -74,6 +91,6 @@ async def main():
     await runner.setup()
     site = web.TCPSite(runner, host="0.0.0.0", port=8080)
     await site.start()
-    await client.start(os.getenv("DISCORD_TOKEN"))
+    await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())

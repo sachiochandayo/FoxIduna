@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 from aiohttp import web
 import google.generativeai as genai
 import asyncio
@@ -13,6 +14,7 @@ load_dotenv()
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="/", intents=intents)
+tree = app_commands.CommandTree(bot)
 
 # Geminiの初期化
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -42,6 +44,7 @@ def split_text(text, chunk_size=1500):
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
+    await tree.sync()  # コマンドをDiscordに同期！
     print(bot.commands)
 
 @bot.event
@@ -66,9 +69,14 @@ async def on_message(message):
         await message.channel.send(f"Geminiとの通信に失敗しました: {type(e).__name__} - {e}")
         print(f"Gemini error: {e}")
 
-@bot.command()
-async def createform(ctx, title, description, period, contact):
-    print("✅ createformコマンドが登録されました")
+@tree.command(name="createform", description="イベント日程調整フォームを作成")
+@app_commands.describe(
+    title="イベントのタイトル",
+    description="イベントの説明",
+    period="希望する期間（開始〜終了）",
+    contact="その他連絡事項（任意）"
+)
+async def createform(interaction: discord.Interaction, title, description, period, contact):
     payload = {
         "title": title,
         "description": description,
@@ -78,7 +86,7 @@ async def createform(ctx, title, description, period, contact):
     response = requests.post(os.getenv("GAS_WEBAPP_URL"), json=payload)
     form_url = response.text
 
-    await ctx.send(f"@everyone\n📋 日程調整はここから。皆回答してねー\n{form_url}")
+    await interaction.response.send_message(f"@everyone\n📋 日程調整はここから。皆回答してねー\n{form_url}")
 
 # HTTPサーバーの設定（Cloud Run用）
 async def handle(request):

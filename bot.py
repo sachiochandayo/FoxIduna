@@ -85,12 +85,23 @@ async def handle(request):
 app = web.Application()
 app.router.add_get("/", handle)
 
-# 並行でBotとHTTPサーバーを動かす
-async def main():
+# HTTPサーバー起動
+async def start_server():
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, host="0.0.0.0", port=8080)
+    port = int(os.environ.get("PORT", 8080))  # Cloud Runが渡すPORTを使う
+    site = web.TCPSite(runner, host="0.0.0.0", port=port)
     await site.start()
+
+# Discord Bot起動
+async def start_bot():
     await bot.start(os.getenv("DISCORD_TOKEN"))
+
+# 並行でBotとHTTPサーバーを動かす
+async def main():
+    await asyncio.gather(
+        start_server(),
+        start_bot()
+    )
 
 asyncio.run(main())

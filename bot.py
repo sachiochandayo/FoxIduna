@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 from aiohttp import web
 import google.generativeai as genai
 import asyncio
